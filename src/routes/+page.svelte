@@ -2,10 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { cn } from 'cn';
 	import SignupDialog from '$lib/components/SignupDialog.svelte';
+	import { registerStudent } from '$lib/public.remote';
 	const display = "font-['Anybody_Variable',Arial_Black,sans-serif] font-black [font-variation-settings:'wdth'_90]";
 	const paper = 'bg-white [background-image:linear-gradient(#dce8ef_1px,transparent_1px),linear-gradient(90deg,#dce8ef_1px,transparent_1px)] [background-size:38px_38px] max-[640px]:[background-size:25px_25px]';
 
 	let showConfirmation = $state(false);
+	let isSubmitting = $state(false);
+	let registrationError = $state('');
 	let registration = $state({
 		fullName: '', email: '', className: '', section: '', school: '', city: '', schoolAddress: ''
 	});
@@ -17,11 +20,20 @@
 		{ title: 'WIN', copy: 'Top your reading game. Ace the Friday quizzes. Win exciting prizes.', art: 'landing-vector9.svg', side: 'right' }
 	];
 
-	function register(event: SubmitEvent) {
+	async function register(event: SubmitEvent) {
 		event.preventDefault();
-		// Preview only until registration storage and validation rules are provided.
-		sessionStorage.setItem('nie-registration-preview', JSON.stringify(registration));
-		showConfirmation = true;
+		if (isSubmitting) return;
+		isSubmitting = true;
+		registrationError = '';
+		try {
+			await registerStudent(registration);
+			sessionStorage.setItem('nie-registration-preview', JSON.stringify(registration));
+			showConfirmation = true;
+		} catch (cause) {
+			registrationError = cause instanceof Error ? cause.message : 'Registration failed. Please try again.';
+		} finally {
+			isSubmitting = false;
+		}
 	}
 </script>
 
@@ -84,8 +96,9 @@
 					<label for="city">City</label><input id="city" name="city" autocomplete="address-level2" bind:value={registration.city} required />
 					<label for="schoolAddress">School Address</label><input id="schoolAddress" name="schoolAddress" autocomplete="street-address" bind:value={registration.schoolAddress} required />
 				</div>
+				{#if registrationError}<p class="mt-5 rounded-lg bg-white px-4 py-3 text-left font-semibold text-[#a02500]" role="alert">{registrationError}</p>{/if}
 			</form>
-			<button class="relative mx-auto -mt-8 cursor-pointer rounded-[19px] border-0 bg-[#009d54] px-[42px] py-[21px] text-[clamp(1.25rem,2.2vw,2.65rem)] font-[850] leading-[1.1] text-white hover:bg-[#00783f] focus-visible:bg-[#00783f] max-[640px]:-mt-[17px] max-[640px]:w-[min(93%,400px)] max-[640px]:px-[18px] max-[640px]:py-[15px] max-[640px]:text-[1.15rem]" form="registration-form" type="submit">Submit &amp; Join the Challenge</button>
+			<button class="relative mx-auto -mt-8 cursor-pointer rounded-[19px] border-0 bg-[#009d54] px-[42px] py-[21px] text-[clamp(1.25rem,2.2vw,2.65rem)] font-[850] leading-[1.1] text-white hover:bg-[#00783f] focus-visible:bg-[#00783f] disabled:cursor-wait disabled:opacity-65 max-[640px]:-mt-[17px] max-[640px]:w-[min(93%,400px)] max-[640px]:px-[18px] max-[640px]:py-[15px] max-[640px]:text-[1.15rem]" form="registration-form" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Joining…' : 'Submit & Join the Challenge'}</button>
 		</div>
 		<p class="relative z-20 mt-[10px] mb-0 text-center text-[clamp(1rem,1.7vw,2rem)] font-extrabold">#YouCantJustReadOne</p>
 		<img class="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-auto w-full max-[640px]:-left-[5%] max-[640px]:w-[110%] max-[640px]:max-w-none" src="/assets/figma/landing-artboard64-x1.png" alt="A collage of Indian landmarks, a newspaper reader in a taxi, and a reader in an auto rickshaw" />
@@ -95,4 +108,3 @@
 {#if showConfirmation}
 	<SignupDialog onContinue={() => { showConfirmation = false; goto('/quiz'); }} onClose={() => showConfirmation = false} />
 {/if}
-
