@@ -24,6 +24,10 @@
 		{
 			"pattern": "nietimes.co",
 			"custom_domain": true
+		},
+		{
+			"pattern": "www.nietimes.co",
+			"custom_domain": true
 		}
 	],
 	"preview_urls": true
