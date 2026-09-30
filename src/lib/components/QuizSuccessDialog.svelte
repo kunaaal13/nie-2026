@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { onClose }: { onClose: () => void } = $props();
+	let { onClose, questionCount }: { onClose: () => void; questionCount: number } = $props();
 </script>
 
 <div class="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/55 p-5">
@@ -9,7 +9,7 @@
 			<img class="block h-auto w-[min(85%,646px)] max-[600px]:w-[86%]" src="/assets/figma/success-group110.svg" alt="" />
 			<h2 id="success-title" class="sr-only">You did it! Your quiz has been submitted.</h2>
 			<img class="absolute top-[35px] right-[10px] h-auto w-[27%] rotate-[8deg] max-[600px]:top-[60px] max-[600px]:-right-[10px] max-[600px]:w-[30%]" src="/assets/figma/success-fox-happy4-x1.png" alt="" />
-			<p class="relative z-10 mt-[-2px] mb-[18px] w-max max-w-[70%] rotate-[-4deg] rounded-[8px_10px_30px_25px] bg-[#ffd400] px-[22px] pt-3 pb-4 font-['Patrick_Hand',cursive] text-[clamp(1.2rem,3vw,2rem)] leading-[1.2] tracking-[.07em] max-[600px]:mt-1 max-[600px]:max-w-[78%] max-[600px]:text-[1.15rem]">25 QUESTIONS. ONE BIG BRAIN.<br />YOUR RESPONSES ARE IN!</p>
+			<p class="relative z-10 mt-[-2px] mb-[18px] w-max max-w-[70%] rotate-[-4deg] rounded-[8px_10px_30px_25px] bg-[#ffd400] px-[22px] pt-3 pb-4 font-['Patrick_Hand',cursive] text-[clamp(1.2rem,3vw,2rem)] leading-[1.2] tracking-[.07em] max-[600px]:mt-1 max-[600px]:max-w-[78%] max-[600px]:text-[1.15rem]">{questionCount} QUESTIONS. ONE BIG BRAIN.<br />YOUR RESPONSES ARE IN!</p>
 			<p class="relative z-10 m-0 w-3/4 text-[clamp(1.3rem,3vw,1.8rem)] leading-[1.37] max-[600px]:w-full max-[600px]:text-[1.15rem]">You read.<br />You remembered.<br />You took the challenge.<br /><strong>And now your Read India Weekly Quiz has officially been submitted.</strong></p>
 		</div>
 		<div class="relative flex min-h-[140px] items-center justify-between rounded-[50%_35%_0_0/16%_12%_0_0] border-t-[10px] border-[#ffd500] bg-[#009c55] px-8 pt-7 pb-5 text-white max-[600px]:min-h-[130px] max-[600px]:px-[18px] max-[600px]:pt-6 max-[600px]:pb-[18px]">

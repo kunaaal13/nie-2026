@@ -29,7 +29,7 @@ Visit `/admin/setup` with the setup token to create the first admin. After that,
 
 Admins create a quiz at `/admin/quizzes/new`, enter its questions and correct answers, set start and end times in IST, and publish it. The public `/quiz` route shows the published quiz only from its start instant until just before its end instant. Published quiz windows may not overlap. A quiz with responses cannot be edited or deleted.
 
-The admin dashboard includes response counts, scores, student records, individual submissions, and a per-quiz CSV export. All displayed dates and exported timestamps use Asia/Kolkata; dates are stored as UTC instants in D1. The quiz supports 1–100 single-select questions with 2–6 options each. A submission must answer every question and can be made once per registered email per quiz.
+The admin dashboard includes response counts, scores, student records, individual submissions, and a per-quiz CSV export. All displayed dates and exported timestamps use Asia/Kolkata; dates are stored as UTC instants in D1. The quiz supports 1–100 single-select questions with 2–6 options each. Students enter their registered email first, answer one question at a time, and review before submission. The browser saves email, answers, and the current step under a quiz-specific local storage key until submission. A submission must answer every question and can be made once per registered email per quiz.
 
 Student email ownership is not verified. The entered email identifies the student record and their quiz submission, so this flow should be treated as a lightweight quiz rather than an identity-verified assessment.
 
