@@ -6,7 +6,6 @@ SvelteKit app on Cloudflare Workers with D1, Drizzle ORM, Better Auth, Bun, and 
 
 ```sh
 bun install
-bun run db:migrate:local
 ```
 
 Create `.dev.vars` with randomly generated values (the file is ignored by Git):
@@ -21,6 +20,8 @@ Then start the app:
 ```sh
 bun run dev
 ```
+
+Local `bun run dev` and `bun run preview` connect to the same remote D1 database as the deployed Worker. Changes made through either local server appear on the live site. Vitest uses `wrangler.test.jsonc` and an isolated local D1 database.
 
 Visit `/admin/setup` with the setup token to create the first admin. After that, use `/admin/login`. Public sign-up through Better Auth is disabled; students register through the landing page. Only an email listed in `admin_users` can use the dashboard.
 

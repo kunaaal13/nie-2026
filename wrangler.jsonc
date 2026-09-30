@@ -11,6 +11,7 @@
 			"binding": "DB",
 			"database_name": "nie-2026",
 			"database_id": "7f9ced9b-f221-414e-962b-b227cd20f04e",
+			"remote": true,
 			"migrations_dir": "drizzle"
 		}
 	],
