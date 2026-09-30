@@ -41,6 +41,6 @@ bun run build
 bun run preview
 ```
 
-The Worker and D1 database are configured in `wrangler.jsonc`. `bun run db:migrate:remote` applies migrations to the Cloudflare D1 database. Configure the `BETTER_AUTH_SECRET` Worker secret before production use. Set `ADMIN_SETUP_TOKEN` temporarily to create the first admin, then remove that secret. `bun run deploy` builds and deploys the Worker.
+The Worker, D1 database, and `nietimes.co` custom domain are configured in `wrangler.jsonc`. `bun run db:migrate:remote` applies migrations to the Cloudflare D1 database. Configure the `BETTER_AUTH_SECRET` Worker secret before production use. Set `ADMIN_SETUP_TOKEN` temporarily to create the first admin, then remove that secret. `bun run deploy` builds and deploys the Worker.
 
 When changing the schema, edit `src/lib/server/db/schema.ts`, run `bun run db:generate`, review the generated SQL migration, and apply it locally and remotely. Application database reads and writes use Drizzle ORM.

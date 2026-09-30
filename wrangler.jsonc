@@ -20,5 +20,11 @@
 		"directory": ".svelte-kit/cloudflare"
 	},
 	"workers_dev": true,
+	"routes": [
+		{
+			"pattern": "nietimes.co",
+			"custom_domain": true
+		}
+	],
 	"preview_urls": true
 }
