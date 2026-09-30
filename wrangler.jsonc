@@ -1,9 +1,18 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "nie-2026",
+	"account_id": "361b14d6f7c6e8cebf505713f5b96f69",
 	"compatibility_date": "2026-09-28",
 	"compatibility_flags": [
-		"nodejs_als"
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "nie-2026",
+			"database_id": "7f9ced9b-f221-414e-962b-b227cd20f04e",
+			"migrations_dir": "drizzle"
+		}
 	],
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"assets": {
