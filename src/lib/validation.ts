@@ -31,22 +31,46 @@ export const questionInputSchema = z.object({
 	path: ['correctOption']
 });
 
-export const quizInputSchema = z.object({
-	id: z.uuid().optional(),
+const quizDetailsFields = {
 	weekNumber: z.number().int().min(1).max(52),
 	title: trimmed(160),
 	description: z.string().trim().max(1000),
 	startIst: z.string(),
 	endIst: z.string(),
-	published: z.boolean(),
+	published: z.boolean()
+};
+
+export const quizInputSchema = z.object({
+	id: z.uuid().optional(),
+	...quizDetailsFields,
 	questions: z.array(questionInputSchema).min(1).max(100)
 });
 
-export const quizFilterSchema = z.object({
+// Schedule and details only; used for quizzes whose questions are locked by responses.
+export const quizDetailsSchema = z.object({ id: z.uuid(), ...quizDetailsFields });
+
+export const quizPublishSchema = z.object({ id: z.uuid(), published: z.boolean() });
+
+const page = z.number().int().min(1).max(10000).default(1);
+const search = z.string().trim().max(120).default('');
+
+export const responseFilterSchema = z.object({
 	quizId: z.uuid().optional(),
-	page: z.number().int().min(1).max(10000).default(1),
-	search: z.string().trim().max(120).default('')
+	page,
+	search,
+	sort: z.enum(['recent', 'oldest', 'score-desc', 'score-asc']).default('recent')
 });
+
+export const studentFilterSchema = z.object({
+	page,
+	search,
+	className: z.string().trim().max(40).optional(),
+	city: z.string().trim().max(100).optional(),
+	participation: z.enum(['all', 'attempted', 'never']).default('all'),
+	sort: z.enum(['recent', 'oldest', 'name', 'attempts']).default('recent')
+});
+
+export const studentUpdateSchema = registrationSchema.extend({ id: z.uuid() });
 
 export type RegistrationInput = z.input<typeof registrationSchema>;
 export type QuizInput = z.input<typeof quizInputSchema>;

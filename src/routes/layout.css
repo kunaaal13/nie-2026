@@ -5,6 +5,8 @@
 @import "tw-animate-css";
 @import "shadcn-svelte/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -128,5 +130,67 @@
 	}
 	html {
 		@apply font-sans;
+	}
+}
+
+/*
+ * Admin dashboard theme. Scoped with :has() so the landing and quiz pages keep the
+ * default tokens, while portalled content (dialogs, menus, toasts) still picks it up.
+ * Brand orange #ff5e1f is used for accents only; #c93d09 carries white text at AA contrast.
+ */
+:root:has([data-admin-shell]) {
+	--background: #fdfdfc;
+	--foreground: #262626;
+	--card: #ffffff;
+	--card-foreground: #262626;
+	--popover: #ffffff;
+	--popover-foreground: #262626;
+	--primary: #c93d09;
+	--primary-foreground: #ffffff;
+	--secondary: #f4f4f2;
+	--secondary-foreground: #262626;
+	--muted: #f4f4f2;
+	--muted-foreground: #6b6b69;
+	--accent: #fff1ea;
+	--accent-foreground: #9a2e05;
+	--destructive: #c9241a;
+	--border: #e9e9e6;
+	--input: #dededa;
+	--ring: #ff5e1f;
+	--brand: #ff5e1f;
+	--brand-soft: #fff1ea;
+	--success: #15803d;
+	--warning: #b45309;
+	--radius: 0.25rem;
+	--sidebar: #ffffff;
+	--sidebar-foreground: #262626;
+	--sidebar-primary: #c93d09;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #fff1ea;
+	--sidebar-accent-foreground: #9a2e05;
+	--sidebar-border: #e9e9e6;
+	--sidebar-ring: #ff5e1f;
+	--shadow-card: 0 4px 60px 0 rgb(255 80 10 / 0.06), 0 2px 12px 0 rgb(0 0 0 / 0.03);
+	color-scheme: light;
+}
+
+:root:has([data-admin-shell]) body {
+	font-family: 'Geist Variable', 'Inter Variable', sans-serif;
+	letter-spacing: -0.01em;
+	font-feature-settings: 'ss01', 'tnum' 0;
+}
+
+@theme inline {
+	--color-brand: var(--brand);
+	--color-brand-soft: var(--brand-soft);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-admin-shell] *, [data-admin-shell] *::before, [data-admin-shell] *::after {
+		transition-duration: 0ms !important;
+		animation-duration: 0ms !important;
 	}
 }

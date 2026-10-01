@@ -26,9 +26,9 @@
 				<p class="mt-3 mb-0 max-w-[886px] text-[clamp(1rem,1.85vw,2.25rem)] leading-[1.22] max-[1050px]:text-[1.05rem] max-[650px]:mt-[5px] max-[650px]:text-[clamp(.8rem,2.8vw,1rem)] max-[650px]:leading-[1.16]"><strong>You’ve read the words.<br />You’ve followed the stories.<br />You’ve discovered something new every day.</strong><br />Every Friday, take the <strong>Read India Weekly Quiz</strong> and see how much of the week you can remember.</p>
 			</div>
 		</div>
-		<div class="absolute top-[63%] left-[1.8%] z-30 w-[48.7%] rotate-[-1.1deg] max-[650px]:top-auto max-[650px]:bottom-[17%] max-[650px]:left-[3%] max-[650px]:w-[94%]">
+		<div class={cn('absolute top-[63%] left-[1.8%] z-30 w-[48.7%] rotate-[-1.1deg] max-[650px]:top-auto max-[650px]:bottom-[17%] max-[650px]:left-[3%] max-[650px]:w-[94%]', data.campaign.phase !== 'quiz' && 'max-[650px]:bottom-[24%]')}>
 			<img class="block h-auto w-full" src="/assets/figma/quiz-vector4.svg" alt="" />
-			<p class="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap px-2 font-['Patrick_Hand',cursive] text-[clamp(1rem,2.1vw,2.5rem)] tracking-[.02em] max-[650px]:text-[clamp(.95rem,4vw,1.35rem)]">{quiz ? quiz.questions.length : 'WEEKLY'} QUESTIONS • 3 QUIZZES • EXCITING GOODIES</p>
+			<p class="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap px-2 font-['Patrick_Hand',cursive] text-[clamp(1rem,2.1vw,2.5rem)] tracking-[.02em] max-[650px]:text-[clamp(.75rem,3.2vw,1.35rem)]">{quiz ? quiz.questions.length : 'WEEKLY'} QUESTIONS • 3 QUIZZES • EXCITING GOODIES</p>
 		</div>
 		{#if data.campaign.phase === 'quiz'}
 			<img class="absolute top-[82.3%] left-0 z-10 h-auto w-[32.9%] max-[650px]:top-auto max-[650px]:bottom-[3%] max-[650px]:h-[100px] max-[650px]:w-full" src="/assets/figma/quiz-vector3.svg" alt="" />
@@ -42,7 +42,7 @@
 				<p class={cn(display, 'm-0 text-[clamp(1.4rem,3.3vw,4rem)] leading-[1.05] max-[650px]:text-[1.75rem]')}>
 					{#if data.campaign.phase === 'upcoming'}WEEK {data.campaign.nextQuiz?.weekNumber} QUIZ IS COMING.
 					{:else if data.campaign.phase === 'not-scheduled'}THE NEXT QUIZ IS BEING PREPARED.
-					{:else}THE 2026 QUIZZES HAVE ENDED.{/if}
+					{:else}NO QUIZ IS OPEN RIGHT NOW.{/if}
 				</p>
 			</div>
 		{/if}
@@ -51,13 +51,13 @@
 	{#if data.campaign.phase === 'quiz' && quiz}
 	{#key quiz.id}<QuizStepper {quiz} />{/key}
 	{:else}
-		<section class="mx-auto max-w-[850px] px-6 pb-24 text-center">
+		<section class="mx-auto max-w-[850px] px-6 pt-10 pb-24 text-center max-[650px]:pt-8">
 			<p class="text-[clamp(1.2rem,2.2vw,1.8rem)] leading-[1.3]">
 				{#if data.campaign.phase === 'upcoming'}Week {data.campaign.nextQuiz?.weekNumber} opens {data.campaign.nextQuiz?.startAtIst}. Keep reading and come back then.
 				{:else if data.campaign.phase === 'not-scheduled'}The next quiz is being prepared. Register now and check back soon.
-				{:else}Thanks for reading with us. The available quizzes have closed.{/if}
+				{:else}The available quizzes have closed. Check back for the next one.{/if}
 			</p>
-			<a class="inline-block rounded-xl bg-[#009c55] px-8 py-4 font-bold text-white hover:bg-[#007b43] focus-visible:bg-[#007b43]" href="/">Back to Read India</a>
+			<a class="mt-8 inline-block rounded-xl bg-[#009c55] px-8 py-4 font-bold text-white hover:bg-[#007b43] focus-visible:bg-[#007b43] max-[650px]:mt-6" href="/">Back to Read India</a>
 		</section>
 	{/if}
 </main>

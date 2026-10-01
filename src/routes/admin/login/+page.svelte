@@ -2,9 +2,10 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
+	import * as Field from '$lib/components/ui/field';
+	import * as Alert from '$lib/components/ui/alert';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import AuthShell from '$lib/components/admin/AuthShell.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -31,16 +32,17 @@
 
 <svelte:head><title>Admin sign in — NIE Read India</title></svelte:head>
 
-<div class="grid min-h-screen place-items-center bg-slate-100 px-4 py-10 font-['Inter_Variable',sans-serif]">
-	<Card.Root class="w-full max-w-md shadow-lg">
-		<Card.Header><Card.Title class="text-2xl">Admin sign in</Card.Title><Card.Description>Manage quizzes, students, and responses.</Card.Description></Card.Header>
-		<Card.Content>
-			<form class="grid gap-5" onsubmit={signIn}>
-				<div class="grid gap-2"><Label for="admin-email">Email</Label><Input id="admin-email" type="email" autocomplete="email" bind:value={email} required /></div>
-				<div class="grid gap-2"><Label for="admin-password">Password</Label><Input id="admin-password" type="password" autocomplete="current-password" bind:value={password} required /></div>
-				{#if message}<p class="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{message}</p>{/if}
-				<Button type="submit" disabled={loading} class="w-full">{loading ? 'Signing in…' : 'Sign in'}</Button>
-			</form>
-		</Card.Content>
-	</Card.Root>
-</div>
+<AuthShell title="Sign in" description="Manage quizzes, students and responses.">
+	<form class="grid gap-5" onsubmit={signIn}>
+		<Field.Field>
+			<Field.Label for="admin-email">Email</Field.Label>
+			<Input id="admin-email" type="email" autocomplete="email" bind:value={email} required />
+		</Field.Field>
+		<Field.Field>
+			<Field.Label for="admin-password">Password</Field.Label>
+			<Input id="admin-password" type="password" autocomplete="current-password" bind:value={password} required />
+		</Field.Field>
+		{#if message}<Alert.Root variant="destructive"><Alert.Description>{message}</Alert.Description></Alert.Root>{/if}
+		<Button type="submit" disabled={loading} class="w-full">{loading ? 'Signing in…' : 'Sign in'}</Button>
+	</form>
+</AuthShell>

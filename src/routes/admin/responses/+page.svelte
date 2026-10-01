@@ -1,40 +1,185 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { createQuery } from '@tanstack/svelte-query';
-	import { Download, Search } from '@lucide/svelte';
-	import { listQuizzes, listResponses } from '$lib/admin.remote';
-	import { formatIstDateTime } from '$lib/ist';
-	import { Button } from '$lib/components/ui/button';
+	import { createQuery, keepPreviousData, useQueryClient } from '@tanstack/svelte-query';
+	import { toast } from 'svelte-sonner';
+	import { Download, Eye, MoreHorizontal, Search, Trash2, User, X } from '@lucide/svelte';
+	import { deleteResponse, listQuizzes, listResponses } from '$lib/admin.remote';
+	import { formatIstShort, fromNow } from '$lib/ist';
 	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
+	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as InputGroup from '$lib/components/ui/input-group';
+	import * as Empty from '$lib/components/ui/empty';
+	import { Button } from '$lib/components/ui/button';
+	import { Skeleton } from '$lib/components/ui/skeleton';
+	import PageHeader from '$lib/components/admin/PageHeader.svelte';
+	import Pager from '$lib/components/admin/Pager.svelte';
+	import ScoreBadge from '$lib/components/admin/ScoreBadge.svelte';
+	import ConfirmDialog from '$lib/components/admin/ConfirmDialog.svelte';
+	import QueryError from '$lib/components/admin/QueryError.svelte';
+
+	type Sort = 'recent' | 'oldest' | 'score-desc' | 'score-asc';
+	const sorts: Record<Sort, string> = { recent: 'Newest first', oldest: 'Oldest first', 'score-desc': 'Highest score', 'score-asc': 'Lowest score' };
+	const queryClient = useQueryClient();
 
 	let quizId = $state(page.url.searchParams.get('quizId') ?? '');
-	let searchDraft = $state('');
-	let search = $state('');
+	let searchDraft = $state(page.url.searchParams.get('search') ?? '');
+	let search = $state(page.url.searchParams.get('search') ?? '');
+	let sort = $state<Sort>((page.url.searchParams.get('sort') as Sort) in sorts ? page.url.searchParams.get('sort') as Sort : 'recent');
 	let currentPage = $state(1);
+	let pendingDelete = $state<{ id: string; fullName: string } | null>(null);
+	let deleting = $state(false);
+
 	const quizzes = createQuery(() => ({ queryKey: ['admin', 'quizzes'], queryFn: () => listQuizzes() }));
-	const responses = createQuery(() => ({ queryKey: ['admin', 'responses', quizId, search, currentPage], queryFn: () => listResponses({ quizId: quizId || undefined, search, page: currentPage }) }));
+	const responses = createQuery(() => ({
+		queryKey: ['admin', 'responses', quizId, search, sort, currentPage],
+		queryFn: () => listResponses({ quizId: quizId || undefined, search, sort, page: currentPage }),
+		placeholderData: keepPreviousData
+	}));
+	const selectedQuiz = $derived(quizzes.data?.find((quiz) => quiz.id === quizId));
+	const filtered = $derived(Boolean(quizId || search));
+
+	// Debounce typing, then keep the filters in the URL so views can be bookmarked and shared.
+	$effect(() => {
+		const value = searchDraft.trim();
+		const timer = setTimeout(() => { if (value !== search) { search = value; currentPage = 1; } }, 300);
+		return () => clearTimeout(timer);
+	});
+	$effect(() => {
+		const url = new URL(page.url);
+		for (const [key, value] of [['quizId', quizId], ['search', search], ['sort', sort === 'recent' ? '' : sort]]) {
+			if (value) url.searchParams.set(key, value); else url.searchParams.delete(key);
+		}
+		if (url.search !== page.url.search) goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	function clearFilters() {
+		quizId = ''; searchDraft = ''; search = ''; currentPage = 1;
+	}
+
+	async function confirmDelete() {
+		if (!pendingDelete) return;
+		deleting = true;
+		try {
+			await deleteResponse(pendingDelete.id);
+			toast.success(`Response from ${pendingDelete.fullName} deleted. They can take the quiz again while it's open.`);
+			pendingDelete = null;
+			await queryClient.invalidateQueries({ queryKey: ['admin'] });
+		} catch (cause) {
+			toast.error(cause instanceof Error ? cause.message : 'Could not delete this response.');
+		} finally {
+			deleting = false;
+		}
+	}
 </script>
 
 <svelte:head><title>Responses — NIE Read India Admin</title></svelte:head>
 
-<div class="mb-7"><p class="mb-1 text-sm font-semibold uppercase tracking-widest text-emerald-700">Manage</p><h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Responses</h1><p class="mt-2 text-slate-500">Review student answers and export a quiz as CSV. All times are IST.</p></div>
+<PageHeader title="Responses" description="Every quiz submission. Filter by quiz to export it with each student's answers.">
+	{#snippet actions()}
+		{#if quizId}
+			<Button variant="outline" href={`/admin/export?quizId=${quizId}`} download><Download /> Export week {selectedQuiz?.weekNumber ?? ''} CSV</Button>
+		{:else}
+			<Button variant="outline" href="/admin/export/responses" download><Download /> Export all CSV</Button>
+		{/if}
+	{/snippet}
+</PageHeader>
 
-<Card.Root><Card.Content class="pt-6">
-	<div class="mb-5 flex flex-wrap items-end gap-3">
-		<div class="grid min-w-52 flex-1 gap-2"><label class="text-sm font-medium" for="response-quiz">Quiz</label><select id="response-quiz" bind:value={quizId} onchange={() => currentPage = 1} class="h-9 rounded-md border border-input bg-white px-3 text-sm"><option value="">All quizzes</option>{#each quizzes.data ?? [] as quiz}<option value={quiz.id}>Week {quiz.weekNumber}: {quiz.title}</option>{/each}</select></div>
-		<form class="flex min-w-52 flex-[2] gap-2" onsubmit={(event) => { event.preventDefault(); search = searchDraft.trim(); currentPage = 1; }}><Input aria-label="Search by student name or email" placeholder="Search name or email" bind:value={searchDraft} /><Button type="submit" variant="outline"><Search class="size-4" /><span class="sr-only">Search</span></Button></form>
-		{#if quizId}<a href={'/admin/export?quizId=' + quizId}><Button variant="outline"><Download class="mr-2 size-4" /> Export CSV</Button></a>{/if}
+<Card.Root class="gap-0 py-0">
+	<div class="flex flex-col gap-2 border-b p-3 md:flex-row md:items-center">
+		<Select.Root type="single" bind:value={quizId} onValueChange={() => currentPage = 1}>
+			<Select.Trigger class="w-full md:w-72" aria-label="Filter by quiz">
+				<span class="truncate">{selectedQuiz ? `Week ${selectedQuiz.weekNumber}: ${selectedQuiz.title}` : 'All quizzes'}</span>
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Item value="">All quizzes</Select.Item>
+				<Select.Separator />
+				{#each quizzes.data ?? [] as quiz}
+					<Select.Item value={quiz.id} label={`Week ${quiz.weekNumber}: ${quiz.title}`}>
+						<span class="truncate">Week {quiz.weekNumber}: {quiz.title}</span>
+						<span class="ml-auto pl-3 text-xs text-muted-foreground tabular-nums">{quiz.responseCount}</span>
+					</Select.Item>
+				{/each}
+			</Select.Content>
+		</Select.Root>
+		<InputGroup.Root class="md:max-w-80">
+			<InputGroup.Addon><Search /></InputGroup.Addon>
+			<InputGroup.Input placeholder="Search name, email or school" aria-label="Search responses" bind:value={searchDraft} />
+			{#if searchDraft}<InputGroup.Addon align="inline-end"><InputGroup.Button size="icon-xs" aria-label="Clear search" onclick={() => searchDraft = ''}><X /></InputGroup.Button></InputGroup.Addon>{/if}
+		</InputGroup.Root>
+		<Select.Root type="single" bind:value={sort} onValueChange={() => currentPage = 1}>
+			<Select.Trigger class="w-full md:ml-auto md:w-44" aria-label="Sort responses">{sorts[sort]}</Select.Trigger>
+			<Select.Content>{#each Object.entries(sorts) as [value, label]}<Select.Item {value} {label}>{label}</Select.Item>{/each}</Select.Content>
+		</Select.Root>
 	</div>
-	{#if responses.isPending}<p class="py-10 text-center text-slate-500">Loading responses…</p>
-	{:else if responses.isError}<p class="rounded-md bg-red-50 p-4 text-red-700" role="alert">{responses.error.message}</p>
-	{:else if responses.data.count === 0}<p class="py-10 text-center text-slate-500">No responses match these filters.</p>
+
+	{#if responses.isPending}
+		<div class="grid gap-2 p-4">{#each Array(8) as _}<Skeleton class="h-11" />{/each}</div>
+	{:else if responses.isError}
+		<div class="p-4"><QueryError error={responses.error} retry={() => responses.refetch()} /></div>
+	{:else if responses.data.count === 0}
+		<Empty.Root class="py-16">
+			<Empty.Header>
+				<Empty.Title>{filtered ? 'No matching responses' : 'No responses yet'}</Empty.Title>
+				<Empty.Description>{filtered ? 'Try another quiz or search term.' : 'Submissions appear here once students take a published quiz.'}</Empty.Description>
+			</Empty.Header>
+			{#if filtered}<Empty.Content><Button variant="outline" onclick={clearFilters}>Clear filters</Button></Empty.Content>{/if}
+		</Empty.Root>
 	{:else}
-		<p class="mb-3 text-sm text-slate-500">{responses.data.count} response(s)</p>
-		<div class="overflow-x-auto"><Table.Root><Table.Header><Table.Row><Table.Head>Student</Table.Head><Table.Head>Quiz</Table.Head><Table.Head>School</Table.Head><Table.Head>Score</Table.Head><Table.Head>Submitted (IST)</Table.Head><Table.Head><span class="sr-only">Details</span></Table.Head></Table.Row></Table.Header><Table.Body>
-			{#each responses.data.rows as response}<Table.Row><Table.Cell><span class="font-semibold">{response.fullName}</span><span class="block text-xs text-slate-500">{response.email}</span></Table.Cell><Table.Cell>Week {response.weekNumber}: {response.quizTitle}</Table.Cell><Table.Cell>{response.school}</Table.Cell><Table.Cell class="font-semibold">{response.score}/{response.totalQuestions}</Table.Cell><Table.Cell class="whitespace-nowrap">{formatIstDateTime(response.submittedAt)}</Table.Cell><Table.Cell><a class="font-semibold text-emerald-700 hover:underline" href={'/admin/responses/' + response.id}>View</a></Table.Cell></Table.Row>{/each}
-		</Table.Body></Table.Root></div>
-		<div class="mt-5 flex items-center justify-between"><Button variant="outline" disabled={currentPage <= 1} onclick={() => currentPage--}>Previous</Button><span class="text-sm text-slate-500">Page {currentPage} of {Math.ceil(responses.data.count / responses.data.pageSize)}</span><Button variant="outline" disabled={currentPage * responses.data.pageSize >= responses.data.count} onclick={() => currentPage++}>Next</Button></div>
+		<div class={['transition-opacity', responses.isPlaceholderData && 'opacity-60']}>
+			<Table.Root>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="pl-4">Student</Table.Head>
+						{#if !quizId}<Table.Head>Quiz</Table.Head>{/if}
+						<Table.Head>School</Table.Head>
+						<Table.Head>Score</Table.Head>
+						<Table.Head>Submitted</Table.Head>
+						<Table.Head class="w-12 pr-4"><span class="sr-only">Actions</span></Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each responses.data.rows as response (response.id)}
+						<Table.Row>
+							<Table.Cell class="max-w-64 pl-4">
+								<a href={`/admin/responses/${response.id}`} class="block truncate font-medium hover:underline">{response.fullName}</a>
+								<span class="block truncate text-xs text-muted-foreground">{response.email}</span>
+							</Table.Cell>
+							{#if !quizId}<Table.Cell class="whitespace-nowrap">Week {response.weekNumber}</Table.Cell>{/if}
+							<Table.Cell class="max-w-64">
+								<span class="block truncate">{response.school}</span>
+								<span class="block truncate text-xs text-muted-foreground">Class {response.className}{response.section ? ` · ${response.section}` : ''} · {response.city}</span>
+							</Table.Cell>
+							<Table.Cell><ScoreBadge score={response.score} total={response.totalQuestions} /></Table.Cell>
+							<Table.Cell class="whitespace-nowrap" title={`${formatIstShort(response.submittedAt)} IST`}>
+								<span class="text-sm">{formatIstShort(response.submittedAt)}</span>
+								<span class="block text-xs text-muted-foreground">{fromNow(response.submittedAt)}</span>
+							</Table.Cell>
+							<Table.Cell class="pr-4">
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}<Button {...props} variant="ghost" size="icon-sm" aria-label={`Actions for ${response.fullName}`}><MoreHorizontal /></Button>{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content align="end" class="w-48">
+										<DropdownMenu.Item>{#snippet child({ props })}<a href={`/admin/responses/${response.id}`} {...props}><Eye /> View answers</a>{/snippet}</DropdownMenu.Item>
+										<DropdownMenu.Item>{#snippet child({ props })}<a href={`/admin/students/${response.studentId}`} {...props}><User /> View student</a>{/snippet}</DropdownMenu.Item>
+										<DropdownMenu.Separator />
+										<DropdownMenu.Item variant="destructive" onclick={() => pendingDelete = response}><Trash2 /> Delete response</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+			<Pager bind:page={currentPage} count={responses.data.count} pageSize={responses.data.pageSize} noun="responses" />
+		</div>
 	{/if}
-</Card.Content></Card.Root>
+</Card.Root>
+
+<ConfirmDialog bind:open={() => pendingDelete !== null, (open) => { if (!open) pendingDelete = null; }}
+	title="Delete this response?"
+	description={`${pendingDelete?.fullName ?? 'The student'}'s answers and score will be removed, and they will be able to take this quiz again while it's open. This can't be undone.`}
+	pending={deleting} onconfirm={confirmDelete} />
