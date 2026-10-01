@@ -109,7 +109,7 @@
 
 <svelte:window onkeydown={(event) => { if (event.key === 'Escape') showSuccess = false; }} />
 
-<section class="mx-auto w-[min(calc(100%-48px),1120px)] pb-14 font-['Epilogue_Variable',sans-serif] text-black max-[600px]:w-[min(calc(100%-32px),520px)]" aria-label={`${quiz.title} quiz`}>
+<section class="relative z-20 mx-auto mt-[clamp(64px,5vw,96px)] w-[min(calc(100%-48px),1120px)] pb-14 font-['Epilogue_Variable',sans-serif] text-black max-[600px]:mt-10 max-[600px]:w-[min(calc(100%-32px),520px)]" aria-label={`${quiz.title} quiz`}>
 	<div class="mx-auto mb-12 max-w-[1036px] px-1 max-[600px]:mb-11">
 		<div class="mb-2 flex items-center justify-between gap-4 text-sm font-bold text-[#293e2f] max-[600px]:text-xs">
 			<span>{step === 0 ? 'Your details' : step > quiz.questions.length ? 'Review and submit' : `Question ${step} of ${quiz.questions.length}`}</span>
