@@ -10,7 +10,9 @@ export const registrationSchema = z.object({
 	section: trimmed(40),
 	school: trimmed(180),
 	city: trimmed(100),
-	schoolAddress: trimmed(300)
+	schoolAddress: z.string().trim().max(300).default(''),
+	mobileNumber: z.string().trim().min(8).max(24),
+	heardAbout: trimmed(200)
 });
 
 export const quizSubmissionSchema = z.object({
@@ -70,7 +72,11 @@ export const studentFilterSchema = z.object({
 	sort: z.enum(['recent', 'oldest', 'name', 'attempts']).default('recent')
 });
 
-export const studentUpdateSchema = registrationSchema.extend({ id: z.uuid() });
+export const studentUpdateSchema = registrationSchema.extend({
+	id: z.uuid(),
+	mobileNumber: z.string().trim().max(24),
+	heardAbout: z.string().trim().max(200)
+});
 
 export type RegistrationInput = z.input<typeof registrationSchema>;
 export type QuizInput = z.input<typeof quizInputSchema>;

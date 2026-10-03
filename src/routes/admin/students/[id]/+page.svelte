@@ -18,14 +18,16 @@
 	import ConfirmDialog from '$lib/components/admin/ConfirmDialog.svelte';
 	import QueryError from '$lib/components/admin/QueryError.svelte';
 
-	type Form = { fullName: string; email: string; className: string; section: string; school: string; city: string; schoolAddress: string };
+	type Form = { fullName: string; email: string; className: string; section: string; school: string; city: string; schoolAddress: string; mobileNumber: string; heardAbout: string };
 	const fields: { key: keyof Form; label: string; type?: string; wide?: boolean }[] = [
 		{ key: 'fullName', label: 'Full name' },
 		{ key: 'email', label: 'Email', type: 'email' },
 		{ key: 'className', label: 'Class' },
 		{ key: 'section', label: 'Section' },
 		{ key: 'school', label: 'School', wide: true },
-		{ key: 'city', label: 'City' }
+		{ key: 'city', label: 'City' },
+		{ key: 'mobileNumber', label: 'Mobile / WhatsApp number', type: 'tel' },
+		{ key: 'heardAbout', label: 'How they heard about Read India', wide: true }
 	];
 
 	const queryClient = useQueryClient();
@@ -44,8 +46,8 @@
 		: null);
 
 	function pick(source: Form): Form {
-		const { fullName, email, className, section, school, city, schoolAddress } = source;
-		return { fullName, email, className, section, school, city, schoolAddress };
+		const { fullName, email, className, section, school, city, schoolAddress, mobileNumber, heardAbout } = source;
+		return { fullName, email, className, section, school, city, schoolAddress, mobileNumber, heardAbout };
 	}
 	$effect(() => {
 		if (original && !form) form = { ...original };

@@ -71,7 +71,7 @@
 				<Card.Header><Card.Title class="text-sm">Student</Card.Title></Card.Header>
 				<Card.Content>
 					<dl class="grid gap-3 text-sm">
-						{#each [['Email', data.email], ['Class', `${data.className}${data.section ? ` · Section ${data.section}` : ''}`], ['School', data.school], ['City', data.city], ['School address', data.schoolAddress]] as [label, value]}
+						{#each [['Email', data.email], ['Mobile / WhatsApp number', data.mobileNumber], ['Class', `${data.className}${data.section ? ` · Section ${data.section}` : ''}`], ['School', data.school], ['City', data.city], ['School address', data.schoolAddress], ['Heard about Read India', data.heardAbout]] as [label, value]}
 							<div><dt class="text-xs text-muted-foreground">{label}</dt><dd class="break-words">{value}</dd></div>
 						{/each}
 					</dl>

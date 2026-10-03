@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	if (!quizId || !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(quizId)) error(400, 'Choose a quiz to export.');
 	const quiz = await getQuiz(env.DB, quizId);
 	const header = [
-		'Full name', 'Email', 'Class', 'Section', 'School', 'City', 'School address',
+		'Full name', 'Email', 'Mobile / WhatsApp number', 'Class', 'Section', 'School', 'City', 'School address', 'How they heard about Read India',
 		'Score', 'Total questions', 'Score %', 'Submitted at (IST)',
 		...quiz.questions.flatMap((question) => [`Q${question.position} answer`, `Q${question.position} correct`])
 	];
@@ -25,7 +25,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		return batch.rows.map((row) => {
 			const selected = answerMap.get(row.id);
 			return [
-				row.fullName, row.email, row.className, row.section, row.school, row.city, row.schoolAddress,
+				row.fullName, row.email, row.mobileNumber, row.className, row.section, row.school, row.city, row.schoolAddress, row.heardAbout,
 				row.score, row.totalQuestions, Math.round((row.score * 100) / row.totalQuestions), formatIst(row.submittedAt),
 				...quiz.questions.flatMap((question) => {
 					const selectedIndex = selected?.get(question.id);

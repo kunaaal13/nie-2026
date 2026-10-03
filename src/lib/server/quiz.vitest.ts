@@ -9,7 +9,8 @@ import { parseIstInput } from './india-time';
 
 const registration = {
 	fullName: 'Test Student', email: 'student@example.com', className: '8', section: 'A',
-	school: 'NIE School', city: 'Delhi', schoolAddress: 'Test Road, Delhi'
+	school: 'NIE School', city: 'Delhi', schoolAddress: 'Test Road, Delhi',
+	mobileNumber: '9876543210', heardAbout: 'Times NIE, Instagram'
 };
 const quizInput = (weekNumber = 1) => ({
 	weekNumber, title: `Week ${weekNumber} quiz`, description: 'Reading quiz', published: true,
@@ -44,7 +45,9 @@ describe('registration and quiz flow on D1', () => {
 	it('stores one student for a normalized email', async () => {
 		expect(await registerStudent(env.DB, registration)).toEqual({ email: registration.email, alreadyRegistered: false });
 		expect(await registerStudent(env.DB, registration)).toEqual({ email: registration.email, alreadyRegistered: true });
-		expect(await getDb(env.DB).select().from(students)).toHaveLength(1);
+		const saved = await getDb(env.DB).select().from(students);
+		expect(saved).toHaveLength(1);
+		expect(saved[0]).toMatchObject({ mobileNumber: '9876543210', heardAbout: 'Times NIE, Instagram' });
 	});
 
 	it('opens at the configured IST start and closes at the configured IST end', async () => {

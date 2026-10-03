@@ -436,6 +436,7 @@ export async function getResponse(binding: D1Database, id: string) {
 	const [row] = await db.select({ id: submissions.id, quizId: submissions.quizId, quizTitle: quizzes.title, weekNumber: quizzes.weekNumber,
 		studentId: students.id, fullName: students.fullName, email: students.email, school: students.school, className: students.className,
 		section: students.section, city: students.city, schoolAddress: students.schoolAddress,
+		mobileNumber: students.mobileNumber, heardAbout: students.heardAbout,
 		score: submissions.score, totalQuestions: submissions.totalQuestions, submittedAt: submissions.submittedAt })
 		.from(submissions).innerJoin(students, eq(submissions.studentId, students.id))
 		.innerJoin(quizzes, eq(submissions.quizId, quizzes.id)).where(eq(submissions.id, id)).limit(1);
@@ -466,7 +467,7 @@ export async function getQuizExportRows(binding: D1Database, quizId: string, off
 	const rows = await db.select({ id: submissions.id, submittedAt: submissions.submittedAt, score: submissions.score,
 		totalQuestions: submissions.totalQuestions, fullName: students.fullName, email: students.email,
 		className: students.className, section: students.section, school: students.school, city: students.city,
-		schoolAddress: students.schoolAddress })
+		schoolAddress: students.schoolAddress, mobileNumber: students.mobileNumber, heardAbout: students.heardAbout })
 		.from(submissions).innerJoin(students, eq(submissions.studentId, students.id))
 		.where(eq(submissions.quizId, quizId)).orderBy(asc(submissions.submittedAt), asc(submissions.id))
 		.limit(limit).offset(offset);
@@ -480,7 +481,8 @@ export async function getQuizExportRows(binding: D1Database, quizId: string, off
 export async function getResponseExportRows(binding: D1Database, offset: number, limit = 500) {
 	return getDb(binding).select({ weekNumber: quizzes.weekNumber, quizTitle: quizzes.title, submittedAt: submissions.submittedAt,
 		score: submissions.score, totalQuestions: submissions.totalQuestions, fullName: students.fullName, email: students.email,
-		className: students.className, section: students.section, school: students.school, city: students.city })
+		className: students.className, section: students.section, school: students.school, city: students.city,
+		mobileNumber: students.mobileNumber, heardAbout: students.heardAbout })
 		.from(submissions).innerJoin(students, eq(submissions.studentId, students.id)).innerJoin(quizzes, eq(submissions.quizId, quizzes.id))
 		.orderBy(asc(quizzes.weekNumber), asc(submissions.submittedAt), asc(submissions.id)).limit(limit).offset(offset);
 }

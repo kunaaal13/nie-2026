@@ -11,7 +11,7 @@ import { parseIstInput } from './india-time';
 
 const student = (name: string, city = 'Delhi', className = '8') => ({
 	fullName: name, email: `${name.toLowerCase()}@example.com`, className, section: 'A',
-	school: 'NIE School', city, schoolAddress: 'Test Road'
+	school: 'NIE School', city, schoolAddress: 'Test Road', mobileNumber: '9876543210', heardAbout: 'Times NIE'
 });
 const quizInput = (weekNumber: number, startIst: string, endIst: string) => ({
 	weekNumber, title: `Week ${weekNumber} quiz`, description: '', published: true, startIst, endIst,

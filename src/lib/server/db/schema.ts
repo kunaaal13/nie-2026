@@ -61,6 +61,8 @@ export const students = sqliteTable('students', {
 	school: text('school').notNull(),
 	city: text('city').notNull(),
 	schoolAddress: text('school_address').notNull(),
+	mobileNumber: text('mobile_number').notNull().default(''),
+	heardAbout: text('heard_about').notNull().default(''),
 	createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull()
 });
